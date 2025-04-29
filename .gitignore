@@ -1,0 +1,4 @@
+rootfs.ext4
+vmlinux-*
+my-custom-init
+busybox

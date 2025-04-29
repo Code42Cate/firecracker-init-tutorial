@@ -22,8 +22,8 @@ func main() {
 			DriveID:      firecracker.String("rootfs"),
 		}},
 		MachineCfg: models.MachineConfiguration{
-			VcpuCount:  firecracker.Int64(2),
-			MemSizeMib: firecracker.Int64(1024),
+			VcpuCount:  firecracker.Int64(1),
+			MemSizeMib: firecracker.Int64(512),
 		},
 	})
 	if err != nil {

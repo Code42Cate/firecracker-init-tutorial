@@ -21,7 +21,7 @@ func main() {
 
 	go reapZombies()
 
-	if err := StartProcesses("/etc/services", "/var/log"); err != nil {
+	if err := startServices("/etc/services", "/var/log"); err != nil {
 		fmt.Printf("Failed to start processes: %v\n", err)
 	}
 
@@ -52,7 +52,7 @@ func mount(target string, fstype string) {
 	syscall.Mount("none", target, fstype, 0, "")
 }
 
-func StartProcesses(binaryDir string, logDir string) error {
+func startServices(binaryDir string, logDir string) error {
 	files, err := os.ReadDir(binaryDir)
 	if err != nil {
 		return err

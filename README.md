@@ -253,6 +253,15 @@ Run:
 make build
 ```
 
+An empty ext4 filesystem is created:
+
+```bash
+truncate -s 400M rootfs.ext4
+mkfs.ext4 rootfs.ext4
+mkdir -p /mnt
+sudo mount rootfs.ext4 /mnt
+```
+
 The script compiles the Go init program (`init/main.go`) statically for Linux:
 
 ```bash
@@ -274,24 +283,7 @@ chmod +x "$ROOTFS_DIR/bin/sh"
 This gives us a very basic shell inside the VM.
 
 
-An empty ext4 filesystem is created:
-
-```bash
-dd if=/dev/zero of="$EXT4_IMAGE" bs=1M count=$IMAGE_SIZE_MB
-mkfs.ext4 -q -F "$EXT4_IMAGE"
-```
-
-The `rootfs` directory is then copied into the ext4 image:
-
-```bash
-MOUNTPOINT=$(mktemp -d)
-sudo mount -o loop "$EXT4_IMAGE" "$MOUNTPOINT"
-sudo cp -a "$ROOTFS_DIR/." "$MOUNTPOINT/"
-sudo umount "$MOUNTPOINT"
-rmdir "$MOUNTPOINT"
-```
-
-After this step, you have:
+After these step, you have:
 
 - `rootfs.ext4` — the root filesystem image for Firecracker
 - `init` inside the image — the custom init program

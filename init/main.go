@@ -55,7 +55,7 @@ func mount(target string, fstype string) {
 func StartProcesses(binaryDir string, logDir string) error {
 	files, err := os.ReadDir(binaryDir)
 	if err != nil {
-		return fmt.Errorf("failed to read directory %s: %v", binaryDir, err)
+		return err
 	}
 
 	for _, file := range files {
@@ -69,7 +69,6 @@ func StartProcesses(binaryDir string, logDir string) error {
 			continue
 		}
 
-		// check if the file is executable
 		if info.Mode().Perm()&0111 != 0 {
 			go startAndLogProcess(filePath, filepath.Join(logDir, fmt.Sprintf("%s.log", file.Name())))
 		}
@@ -82,19 +81,15 @@ func startAndLogProcess(binaryPath string, logFilePath string) {
 
 	logFile, err := os.OpenFile(logFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 	if err != nil || logFile == nil {
-		fmt.Printf("Failed to open log file %s: %v\n", logFilePath, err)
 		return
 	}
 	defer logFile.Close()
-
-	fmt.Printf("Starting process %s\n", binaryPath)
 
 	cmd := exec.Command(binaryPath)
 	cmd.Stdout = logFile
 	cmd.Stderr = logFile
 
 	if err := cmd.Start(); err != nil {
-		fmt.Printf("Failed to start process %s: %v\n", binaryPath, err)
 		return
 	}
 

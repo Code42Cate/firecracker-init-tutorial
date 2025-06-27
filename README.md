@@ -31,7 +31,7 @@ The most common Linux init system today is **systemd**. However, lighter alterna
 
 Some platforms even build their own. For example, Fly.io developed a small, rust-based init system to quickly boot microVMs. Although it is now archived and unmaintained, you can find it [here](https://github.com/superfly/init-snapshot).
 
-If you only need to run a **single process** (like a web server) inside a Linux environment, you could, in theory, **run that process directly as PID 1** without any formal init system. However, PID 1 has a few special responsibilities (like properly handling signals and reaping zombie processes), which is why even minimal setups often benefit from a small init program.
+If you only need to run a **single process** (like a web server) inside a Linux environment, you could, in theory, **run that process directly as PID 1** without any formal init system. You can do so by passing in the path to the binary as a kernel argument like `init=/path/to/binary`. Check your kernel command line by doing `cat /proc/cmdline`. However, PID 1 has a few special responsibilities (like properly handling signals and reaping zombie processes), which is why even minimal setups often benefit from a small init program.
 
 
 ### History of Init Systems
@@ -49,7 +49,7 @@ Today, the choice of init system can still spark debates (I am sure HackerNews h
 
 ## Should you build your own init system?
 
-**Probably not.** Unless you have a very specific use case, there is usually no reason to write your own init system. Mature options like [systemd](https://systemd.io/), [OpenRC](https://github.com/OpenRC/openrc), or even smaller ones like [tini](https://github.com/krallin/tini) already cover most situations.
+**Probably not.** Unless you have a very specific use case, there is usually no reason to write your own init system. Mature options like [systemd](https://systemd.io/), [OpenRC](https://github.com/OpenRC/openrc), or even smaller ones like [tini](https://github.com/krallin/tini) already cover most situations. However, be aware that more feature rich init systems will add to the boot time of your systems. 
 
 If you are curious about how Linux boots or you want to understand what PID 1 actually does, writing a simple init system is a good learning experience.
 
@@ -101,7 +101,8 @@ func main() {
 	mount("/tmp", "tmpfs")
 	mount("/run", "tmpfs")
 
-	// Start reaping zombies
+	// Start reaping zombies. In Linux every parent has to reap their children after they exit or die.
+	// Children that are not reaped (their parents died) become zombies.
 	go reapZombies()
 
 	// Start the services
@@ -115,7 +116,7 @@ func main() {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
-	// purely aesthetic, just to make it look nicer:)
+	// Purely aesthetic, just to make it look nicer:)
 	cmd.Env = append(os.Environ(), "PS1=[e2b-init-tutorial]\\$ ")
 	cmd.Run()
 
